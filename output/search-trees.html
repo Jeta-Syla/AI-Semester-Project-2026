@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="utf-8">
+  <title>Search Trees</title>
+  <style>
+    body { font-family: Georgia, serif; margin: 32px auto; max-width: 1100px; color: #1c1917; background: #faf7f2; }
+    h1 { font-size: 28px; margin-bottom: 4px; }
+    h2 { font-size: 20px; margin-top: 28px; }
+    p { line-height: 1.45; max-width: 760px; }
+    pre { background: white; border: 1px solid #e7e0d6; padding: 16px; overflow: auto; line-height: 1.35; font-family: Consolas, monospace; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>Search Trees</h1>
+  <p>Pemët e kërkimit për 8-Puzzle, Missionaries and Cannibals dhe Rotating Workforce Scheduling.</p>
+  <section>
+  <h2>8-Puzzle, pema BFS deri te zgjidhja</h2>
+  <p>Fillimi _ 2 3 | 1 5 6 | 4 7 8. Zgjidhja është 4 lëvizje. Pema është BFS deri në atë thellësi.</p>
+  <pre>_ 2 3 | 1 5 6 | 4 7 8
+    ├── poshtë → 1 2 3 | _ 5 6 | 4 7 8
+    │   ├── lart → _ 2 3 | 1 5 6 | 4 7 8  [prerë: gjendje e përsëritur]
+    │   ├── poshtë → 1 2 3 | 4 5 6 | _ 7 8
+    │   │   ├── lart → 1 2 3 | _ 5 6 | 4 7 8  [prerë: gjendje e përsëritur]
+    │   │   └── djathtas → 1 2 3 | 4 5 6 | 7 _ 8
+    │   │       ├── lart → 1 2 3 | 4 _ 6 | 7 5 8
+    │   │       ├── majtas → 1 2 3 | 4 5 6 | _ 7 8  [prerë: gjendje e përsëritur]
+    │   │       └── djathtas → 1 2 3 | 4 5 6 | 7 8 _
+    │   └── djathtas → 1 2 3 | 5 _ 6 | 4 7 8
+    │       ├── lart → 1 _ 3 | 5 2 6 | 4 7 8
+    │       │   ├── poshtë → 1 2 3 | 5 _ 6 | 4 7 8  [prerë: gjendje e përsëritur]
+    │       │   ├── majtas → _ 1 3 | 5 2 6 | 4 7 8
+    │       │   └── djathtas → 1 3 _ | 5 2 6 | 4 7 8
+    │       ├── poshtë → 1 2 3 | 5 7 6 | 4 _ 8
+    │       │   ├── lart → 1 2 3 | 5 _ 6 | 4 7 8  [prerë: gjendje e përsëritur]
+    │       │   ├── majtas → 1 2 3 | 5 7 6 | _ 4 8
+    │       │   └── djathtas → 1 2 3 | 5 7 6 | 4 8 _
+    │       ├── majtas → 1 2 3 | _ 5 6 | 4 7 8  [prerë: gjendje e përsëritur]
+    │       └── djathtas → 1 2 3 | 5 6 _ | 4 7 8
+    │           ├── lart → 1 2 _ | 5 6 3 | 4 7 8
+    │           ├── poshtë → 1 2 3 | 5 6 8 | 4 7 _
+    │           └── majtas → 1 2 3 | 5 _ 6 | 4 7 8  [prerë: gjendje e përsëritur]
+    └── djathtas → 2 _ 3 | 1 5 6 | 4 7 8
+        ├── poshtë → 2 5 3 | 1 _ 6 | 4 7 8
+        │   ├── lart → 2 _ 3 | 1 5 6 | 4 7 8  [prerë: gjendje e përsëritur]
+        │   ├── poshtë → 2 5 3 | 1 7 6 | 4 _ 8
+        │   │   ├── lart → 2 5 3 | 1 _ 6 | 4 7 8  [prerë: gjendje e përsëritur]
+        │   │   ├── majtas → 2 5 3 | 1 7 6 | _ 4 8
+        │   │   └── djathtas → 2 5 3 | 1 7 6 | 4 8 _
+        │   ├── majtas → 2 5 3 | _ 1 6 | 4 7 8
+        │   │   ├── lart → _ 5 3 | 2 1 6 | 4 7 8
+        │   │   ├── poshtë → 2 5 3 | 4 1 6 | _ 7 8
+        │   │   └── djathtas → 2 5 3 | 1 _ 6 | 4 7 8  [prerë: gjendje e përsëritur]
+        │   └── djathtas → 2 5 3 | 1 6 _ | 4 7 8
+        │       ├── lart → 2 5 _ | 1 6 3 | 4 7 8
+        │       ├── poshtë → 2 5 3 | 1 6 8 | 4 7 _
+        │       └── majtas → 2 5 3 | 1 _ 6 | 4 7 8  [prerë: gjendje e përsëritur]
+        ├── majtas → _ 2 3 | 1 5 6 | 4 7 8  [prerë: gjendje e përsëritur]
+        └── djathtas → 2 3 _ | 1 5 6 | 4 7 8
+            ├── poshtë → 2 3 6 | 1 5 _ | 4 7 8
+            │   ├── lart → 2 3 _ | 1 5 6 | 4 7 8  [prerë: gjendje e përsëritur]
+            │   ├── poshtë → 2 3 6 | 1 5 8 | 4 7 _
+            │   └── majtas → 2 3 6 | 1 _ 5 | 4 7 8
+            └── majtas → 2 _ 3 | 1 5 6 | 4 7 8  [prerë: gjendje e përsëritur]</pre>
+</section>
+<section>
+  <h2>Missionaries and Cannibals, pema BFS</h2>
+  <p>3 misionarë, 3 kanibalë, varka nis majtas. Gjendjet e përsëritura priten që pema të mos jetë e pafundme.</p>
+  <pre>M=3 K=3, varkë majtas | djathtas M=0 K=0
+    ├── 1 kanibal → M=3 K=2, varkë djathtas | djathtas M=0 K=1
+    │   └── 1 kanibal → M=3 K=3, varkë majtas | djathtas M=0 K=0  [prerë: e vizituar]
+    ├── 2 kanibalë → M=3 K=1, varkë djathtas | djathtas M=0 K=2
+    │   ├── 1 kanibal → M=3 K=2, varkë majtas | djathtas M=0 K=1
+    │   │   ├── 1 misionar → M=2 K=2, varkë djathtas | djathtas M=1 K=1  [prerë: e vizituar]
+    │   │   ├── 1 kanibal → M=3 K=1, varkë djathtas | djathtas M=0 K=2  [prerë: e vizituar]
+    │   │   └── 2 kanibalë → M=3 K=0, varkë djathtas | djathtas M=0 K=3
+    │   │       ├── 1 kanibal → M=3 K=1, varkë majtas | djathtas M=0 K=2
+    │   │       │   ├── 2 misionarë → M=1 K=1, varkë djathtas | djathtas M=2 K=2
+    │   │       │   │   ├── 2 misionarë → M=3 K=1, varkë majtas | djathtas M=0 K=2  [prerë: e vizituar]
+    │   │       │   │   └── 1 misionar + 1 kanibal → M=2 K=2, varkë majtas | djathtas M=1 K=1
+    │   │       │   │       ├── 2 misionarë → M=0 K=2, varkë djathtas | djathtas M=3 K=1
+    │   │       │   │       │   ├── 2 misionarë → M=2 K=2, varkë majtas | djathtas M=1 K=1  [prerë: e vizituar]
+    │   │       │   │       │   └── 1 kanibal → M=0 K=3, varkë majtas | djathtas M=3 K=0
+    │   │       │   │       │       ├── 1 kanibal → M=0 K=2, varkë djathtas | djathtas M=3 K=1  [prerë: e vizituar]
+    │   │       │   │       │       └── 2 kanibalë → M=0 K=1, varkë djathtas | djathtas M=3 K=2
+    │   │       │   │       │           ├── 1 misionar → M=1 K=1, varkë majtas | djathtas M=2 K=2
+    │   │       │   │       │           │   ├── 1 misionar → M=0 K=1, varkë djathtas | djathtas M=3 K=2  [prerë: e vizituar]
+    │   │       │   │       │           │   └── 1 misionar + 1 kanibal → M=0 K=0, varkë djathtas | djathtas M=3 K=3  [ZGJIDHJE]
+    │   │       │   │       │           ├── 1 kanibal → M=0 K=2, varkë majtas | djathtas M=3 K=1
+    │   │       │   │       │           │   ├── 1 kanibal → M=0 K=1, varkë djathtas | djathtas M=3 K=2  [prerë: e vizituar]
+    │   │       │   │       │           │   └── 2 kanibalë → M=0 K=0, varkë djathtas | djathtas M=3 K=3  [prerë: e vizituar]
+    │   │       │   │       │           └── 2 kanibalë → M=0 K=3, varkë majtas | djathtas M=3 K=0  [prerë: e vizituar]
+    │   │       │   │       └── 1 misionar + 1 kanibal → M=1 K=1, varkë djathtas | djathtas M=2 K=2  [prerë: e vizituar]
+    │   │       │   └── 1 kanibal → M=3 K=0, varkë djathtas | djathtas M=0 K=3  [prerë: e vizituar]
+    │   │       └── 2 kanibalë → M=3 K=2, varkë majtas | djathtas M=0 K=1  [prerë: e vizituar]
+    │   └── 2 kanibalë → M=3 K=3, varkë majtas | djathtas M=0 K=0  [prerë: e vizituar]
+    └── 1 misionar + 1 kanibal → M=2 K=2, varkë djathtas | djathtas M=1 K=1
+        ├── 1 misionar → M=3 K=2, varkë majtas | djathtas M=0 K=1  [prerë: e vizituar]
+        └── 1 misionar + 1 kanibal → M=3 K=3, varkë majtas | djathtas M=0 K=0  [prerë: e vizituar]</pre>
+</section>
+<section>
+  <h2>Rotating Workforce Scheduling, pema e backtracking</h2>
+  <p>3 punëtorë, 3 ditë, një D, një N dhe një pushim çdo ditë. Pas natës nuk lejohet dita, as në cikël.</p>
+  <pre>orar bosh
+    ├── Dita 1: A:D B:N C:-
+    │   ├── Dita 2: A:D B:N C:-
+    │   │   ├── Dita 3: A:D B:N C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:D B:- C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:D C:-  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:N B:- C:D
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:- B:D C:N  [prerë: natë pastaj ditë]
+    │   │   └── Dita 3: A:- B:N C:D
+    │   │       └── prerë: cikli ose pushimi
+    │   ├── Dita 2: A:D B:- C:N
+    │   │   ├── Dita 3: A:D B:N C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:D B:- C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:D C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:- C:D  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:- B:D C:N
+    │   │   │   └── ZGJIDHJE
+    │   │   └── Dita 3: A:- B:N C:D  [prerë: natë pastaj ditë]
+    │   ├── Dita 2: A:N B:D C:-  [prerë: natë pastaj ditë]
+    │   ├── Dita 2: A:N B:- C:D
+    │   │   ├── Dita 3: A:D B:N C:-  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:D B:- C:N  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:N B:D C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:- C:D
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:- B:D C:N
+    │   │   │   └── ZGJIDHJE
+    │   │   └── Dita 3: A:- B:N C:D
+    │   │       └── ZGJIDHJE
+    │   ├── Dita 2: A:- B:D C:N  [prerë: natë pastaj ditë]
+    │   └── Dita 2: A:- B:N C:D
+    │       ├── Dita 3: A:D B:N C:-
+    │       │   └── prerë: cikli ose pushimi
+    │       ├── Dita 3: A:D B:- C:N
+    │       │   └── ZGJIDHJE
+    │       ├── Dita 3: A:N B:D C:-  [prerë: natë pastaj ditë]
+    │       ├── Dita 3: A:N B:- C:D
+    │       │   └── prerë: cikli ose pushimi
+    │       ├── Dita 3: A:- B:D C:N  [prerë: natë pastaj ditë]
+    │       └── Dita 3: A:- B:N C:D
+    │           └── prerë: cikli ose pushimi
+    ├── Dita 1: A:D B:- C:N
+    │   ├── Dita 2: A:D B:N C:-
+    │   │   ├── Dita 3: A:D B:N C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:D B:- C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:D C:-  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:N B:- C:D
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:- B:D C:N  [prerë: natë pastaj ditë]
+    │   │   └── Dita 3: A:- B:N C:D
+    │   │       └── ZGJIDHJE
+    │   ├── Dita 2: A:D B:- C:N
+    │   │   ├── Dita 3: A:D B:N C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:D B:- C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:D C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:- C:D  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:- B:D C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   └── Dita 3: A:- B:N C:D  [prerë: natë pastaj ditë]
+    │   ├── Dita 2: A:N B:D C:-
+    │   │   ├── Dita 3: A:D B:N C:-  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:D B:- C:N  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:N B:D C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:- C:D
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:- B:D C:N
+    │   │   │   └── ZGJIDHJE
+    │   │   └── Dita 3: A:- B:N C:D
+    │   │       └── ZGJIDHJE
+    │   ├── Dita 2: A:N B:- C:D  [prerë: natë pastaj ditë]
+    │   ├── Dita 2: A:- B:D C:N
+    │   │   ├── Dita 3: A:D B:N C:-
+    │   │   │   └── ZGJIDHJE
+    │   │   ├── Dita 3: A:D B:- C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:D C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:- C:D  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:- B:D C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   └── Dita 3: A:- B:N C:D  [prerë: natë pastaj ditë]
+    │   └── Dita 2: A:- B:N C:D  [prerë: natë pastaj ditë]
+    ├── Dita 1: A:N B:D C:-
+    │   ├── Dita 2: A:D B:N C:-  [prerë: natë pastaj ditë]
+    │   ├── Dita 2: A:D B:- C:N  [prerë: natë pastaj ditë]
+    │   ├── Dita 2: A:N B:D C:-
+    │   │   ├── Dita 3: A:D B:N C:-  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:D B:- C:N  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:N B:D C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:- C:D
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:- B:D C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   └── Dita 3: A:- B:N C:D
+    │   │       └── prerë: cikli ose pushimi
+    │   ├── Dita 2: A:N B:- C:D
+    │   │   ├── Dita 3: A:D B:N C:-  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:D B:- C:N  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:N B:D C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:- C:D
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:- B:D C:N
+    │   │   │   └── ZGJIDHJE
+    │   │   └── Dita 3: A:- B:N C:D
+    │   │       └── prerë: cikli ose pushimi
+    │   ├── Dita 2: A:- B:D C:N
+    │   │   ├── Dita 3: A:D B:N C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:D B:- C:N
+    │   │   │   └── ZGJIDHJE
+    │   │   ├── Dita 3: A:N B:D C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:- C:D  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:- B:D C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   └── Dita 3: A:- B:N C:D  [prerë: natë pastaj ditë]
+    │   └── Dita 2: A:- B:N C:D
+    │       ├── Dita 3: A:D B:N C:-
+    │       │   └── prerë: cikli ose pushimi
+    │       ├── Dita 3: A:D B:- C:N
+    │       │   └── ZGJIDHJE
+    │       ├── Dita 3: A:N B:D C:-  [prerë: natë pastaj ditë]
+    │       ├── Dita 3: A:N B:- C:D
+    │       │   └── ZGJIDHJE
+    │       ├── Dita 3: A:- B:D C:N  [prerë: natë pastaj ditë]
+    │       └── Dita 3: A:- B:N C:D
+    │           └── prerë: cikli ose pushimi
+    ├── Dita 1: A:N B:- C:D
+    │   ├── Dita 2: A:D B:N C:-  [prerë: natë pastaj ditë]
+    │   ├── Dita 2: A:D B:- C:N  [prerë: natë pastaj ditë]
+    │   ├── Dita 2: A:N B:D C:-
+    │   │   ├── Dita 3: A:D B:N C:-  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:D B:- C:N  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:N B:D C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:- C:D
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:- B:D C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   └── Dita 3: A:- B:N C:D
+    │   │       └── ZGJIDHJE
+    │   ├── Dita 2: A:N B:- C:D
+    │   │   ├── Dita 3: A:D B:N C:-  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:D B:- C:N  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:N B:D C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:- C:D
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:- B:D C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   └── Dita 3: A:- B:N C:D
+    │   │       └── prerë: cikli ose pushimi
+    │   ├── Dita 2: A:- B:D C:N
+    │   │   ├── Dita 3: A:D B:N C:-
+    │   │   │   └── ZGJIDHJE
+    │   │   ├── Dita 3: A:D B:- C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:D C:-
+    │   │   │   └── ZGJIDHJE
+    │   │   ├── Dita 3: A:N B:- C:D  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:- B:D C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   └── Dita 3: A:- B:N C:D  [prerë: natë pastaj ditë]
+    │   └── Dita 2: A:- B:N C:D
+    │       ├── Dita 3: A:D B:N C:-
+    │       │   └── ZGJIDHJE
+    │       ├── Dita 3: A:D B:- C:N
+    │       │   └── prerë: cikli ose pushimi
+    │       ├── Dita 3: A:N B:D C:-  [prerë: natë pastaj ditë]
+    │       ├── Dita 3: A:N B:- C:D
+    │       │   └── prerë: cikli ose pushimi
+    │       ├── Dita 3: A:- B:D C:N  [prerë: natë pastaj ditë]
+    │       └── Dita 3: A:- B:N C:D
+    │           └── prerë: cikli ose pushimi
+    ├── Dita 1: A:- B:D C:N
+    │   ├── Dita 2: A:D B:N C:-
+    │   │   ├── Dita 3: A:D B:N C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:D B:- C:N
+    │   │   │   └── ZGJIDHJE
+    │   │   ├── Dita 3: A:N B:D C:-  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:N B:- C:D
+    │   │   │   └── ZGJIDHJE
+    │   │   ├── Dita 3: A:- B:D C:N  [prerë: natë pastaj ditë]
+    │   │   └── Dita 3: A:- B:N C:D
+    │   │       └── prerë: cikli ose pushimi
+    │   ├── Dita 2: A:D B:- C:N
+    │   │   ├── Dita 3: A:D B:N C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:D B:- C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:D C:-
+    │   │   │   └── ZGJIDHJE
+    │   │   ├── Dita 3: A:N B:- C:D  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:- B:D C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   └── Dita 3: A:- B:N C:D  [prerë: natë pastaj ditë]
+    │   ├── Dita 2: A:N B:D C:-
+    │   │   ├── Dita 3: A:D B:N C:-  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:D B:- C:N  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:N B:D C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:- C:D
+    │   │   │   └── ZGJIDHJE
+    │   │   ├── Dita 3: A:- B:D C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   └── Dita 3: A:- B:N C:D
+    │   │       └── prerë: cikli ose pushimi
+    │   ├── Dita 2: A:N B:- C:D  [prerë: natë pastaj ditë]
+    │   ├── Dita 2: A:- B:D C:N
+    │   │   ├── Dita 3: A:D B:N C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:D B:- C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:D C:-
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   ├── Dita 3: A:N B:- C:D  [prerë: natë pastaj ditë]
+    │   │   ├── Dita 3: A:- B:D C:N
+    │   │   │   └── prerë: cikli ose pushimi
+    │   │   └── Dita 3: A:- B:N C:D  [prerë: natë pastaj ditë]
+    │   └── Dita 2: A:- B:N C:D  [prerë: natë pastaj ditë]
+    └── Dita 1: A:- B:N C:D
+        ├── Dita 2: A:D B:N C:-
+        │   ├── Dita 3: A:D B:N C:-
+        │   │   └── prerë: cikli ose pushimi
+        │   ├── Dita 3: A:D B:- C:N
+        │   │   └── prerë: cikli ose pushimi
+        │   ├── Dita 3: A:N B:D C:-  [prerë: natë pastaj ditë]
+        │   ├── Dita 3: A:N B:- C:D
+        │   │   └── ZGJIDHJE
+        │   ├── Dita 3: A:- B:D C:N  [prerë: natë pastaj ditë]
+        │   └── Dita 3: A:- B:N C:D
+        │       └── prerë: cikli ose pushimi
+        ├── Dita 2: A:D B:- C:N
+        │   ├── Dita 3: A:D B:N C:-
+        │   │   └── ZGJIDHJE
+        │   ├── Dita 3: A:D B:- C:N
+        │   │   └── prerë: cikli ose pushimi
+        │   ├── Dita 3: A:N B:D C:-
+        │   │   └── ZGJIDHJE
+        │   ├── Dita 3: A:N B:- C:D  [prerë: natë pastaj ditë]
+        │   ├── Dita 3: A:- B:D C:N
+        │   │   └── prerë: cikli ose pushimi
+        │   └── Dita 3: A:- B:N C:D  [prerë: natë pastaj ditë]
+        ├── Dita 2: A:N B:D C:-  [prerë: natë pastaj ditë]
+        ├── Dita 2: A:N B:- C:D
+        │   ├── Dita 3: A:D B:N C:-  [prerë: natë pastaj ditë]
+        │   ├── Dita 3: A:D B:- C:N  [prerë: natë pastaj ditë]
+        │   ├── Dita 3: A:N B:D C:-
+        │   │   └── ZGJIDHJE
+        │   ├── Dita 3: A:N B:- C:D
+        │   │   └── prerë: cikli ose pushimi
+        │   ├── Dita 3: A:- B:D C:N
+        │   │   └── prerë: cikli ose pushimi
+        │   └── Dita 3: A:- B:N C:D
+        │       └── prerë: cikli ose pushimi
+        ├── Dita 2: A:- B:D C:N  [prerë: natë pastaj ditë]
+        └── Dita 2: A:- B:N C:D
+            ├── Dita 3: A:D B:N C:-
+            │   └── prerë: cikli ose pushimi
+            ├── Dita 3: A:D B:- C:N
+            │   └── prerë: cikli ose pushimi
+            ├── Dita 3: A:N B:D C:-  [prerë: natë pastaj ditë]
+            ├── Dita 3: A:N B:- C:D
+            │   └── prerë: cikli ose pushimi
+            ├── Dita 3: A:- B:D C:N  [prerë: natë pastaj ditë]
+            └── Dita 3: A:- B:N C:D
+                └── prerë: cikli ose pushimi</pre>
+</section>
+</body>
+</html>

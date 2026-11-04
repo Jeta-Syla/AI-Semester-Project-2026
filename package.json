@@ -1,0 +1,13 @@
+{
+  "name": "ai-semester-project-2026",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Uninformed search: Social Golfers, Sudoku, Latin Square, search trees.",
+  "scripts": {
+    "start": "node index.js",
+    "golf": "node src/01-social-golfers.js",
+    "sudoku": "node src/02-sudoku.js",
+    "latin": "node src/03-latin-square.js",
+    "trees": "node src/04-search-trees.js"
+  }
+}
