@@ -1,12 +1,3 @@
-/**
- * 2. Sudoku
- * ---------
- * BFS me krasitje (backtracking në kuptimin e detyrës: dega e gabuar hidhet).
- *
- * Nivelet: Lehtë, Mesatar, Vështirë.
- * Të tria dalin nga i njëjti zgjidhje e vlefshme, me gjithnjë e më pak shifra të dhëna.
- */
-
 const SOLUTION = [
   5, 3, 4, 6, 7, 8, 9, 1, 2,
   6, 7, 2, 1, 9, 5, 3, 4, 8,
@@ -113,13 +104,6 @@ function isValid(grid, index, digit) {
   return true;
 }
 
-/**
- * BFS me backtracking.
- * Radha ruan tabelat e pjesshme. Zgjerohet gjithmonë tabela më e vjetër.
- * Qeliza e radhës është qeliza e parë bosh, nga e majta lart.
- * Shifra 1..9 provohet me radhë. Nëse thyen rreshtin, kolonën ose kutinë,
- * ajo degë nuk futet në radhë: kërkimi kthehet te degët e tjera.
- */
 function solveBfs(puzzle) {
   const started = Date.now();
   const queue = [puzzle.slice()];
@@ -165,10 +149,6 @@ function domainSizes(grid) {
   return sizes;
 }
 
-/**
- * f = qeliza bosh + çifte shifrash të njëjta në të njëjtin rresht, kolonë ose kuti.
- * Zgjidhja ka f = 0.
- */
 function objective(grid) {
   let score = grid.filter((value) => value === 0).length;
   for (const unit of UNITS) {

@@ -1,13 +1,3 @@
-/**
- * 3. Latin Square
- * ---------------
- * IDDFS: në çdo raund lejohet një thellësi më shumë.
- * Brenda raundit, vendosja e numrit është DFS me backtracking.
- *
- * Kërkimi gjen një katror latin. Shembulli i detyrës për n = 5 është
- * një katror tjetër, po aq i vlefshëm, dhe kontrollohet me të njëjtin f.
- */
-
 const KNOWN_COUNTS = {
   1: 1,
   2: 2,
@@ -55,11 +45,6 @@ function valuesAt(n, row, col) {
   return values;
 }
 
-/**
- * IDDFS + backtracking.
- * pos = sa qeliza janë mbushur (thellësia).
- * limit = thellësia maksimale e këtij raundi.
- */
 function solveIddfs(n) {
   const grid = Array.from({ length: n }, () => Array(n).fill(0));
   const rowUsed = Array.from({ length: n }, () => Array(n + 1).fill(false));
@@ -103,7 +88,6 @@ function solveIddfs(n) {
   return { grid: null, rounds };
 }
 
-/** Një DFS me backtracking, pa raundet e IDDFS. Për krahasim të nyjeve. */
 function solveBacktracking(n) {
   const grid = Array.from({ length: n }, () => Array(n).fill(0));
   const rowUsed = Array.from({ length: n }, () => Array(n + 1).fill(false));

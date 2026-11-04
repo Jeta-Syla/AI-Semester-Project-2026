@@ -1,16 +1,3 @@
-/**
- * 4. Search Trees
- * ---------------
- * Pema e kërkimit për:
- *   - 8-Puzzle          (BFS)
- *   - Missionaries and Cannibals (BFS)
- *   - Rotating Workforce Scheduling (pemë backtracking)
- *
- * 8-Puzzle: pema BFS deri te zgjidhja.
- * Missionaries and Cannibals: pema e plotë.
- * Rotating Workforce: pema e backtracking për orarin ciklik.
- */
-
 const fs = require("fs");
 const path = require("path");
 
@@ -292,7 +279,6 @@ function shiftList(items) {
   return all;
 }
 
-// Çdo ditë është një permutacion i {D, N, -}: saktësisht një punëtor për ndërrim.
 const DAY_PLANS = shiftList(SHIFTS);
 
 function nightThenMorning(previousDay, nextDay) {

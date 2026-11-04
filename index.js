@@ -1,13 +1,3 @@
-/**
- * Menyja e detyrës semestrale.
- * node index.js        pyet cilin problem
- * node index.js 1      Social Golfers
- * node index.js 2      Sudoku
- * node index.js 3      Latin Square
- * node index.js 4      Search Trees
- * node index.js 5      të gjitha
- */
-
 const readline = require("readline");
 
 const problems = [

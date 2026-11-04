@@ -1,16 +1,5 @@
-/**
- * 1. Social Golfers Problem
- * --------------------------
- * DFS me backtracking.
- *
- * Shembulli i detyrës: 32 lojtarë, 8 grupe me nga 4.
- * Përgjigjja: 10 javë. DFS me backtracking e ndërton orarin.
- */
-
 const OPTIMAL_WEEKS = 10;
 
-// Orari kandidat për 10 javë. DFS e provon grup pas grupi.
-// Java 1 është shembulli i detyrës. Grupi 8: 16,17,18,19.
 const SCHEDULE_32 = [
   [[0, 1, 2, 3], [4, 5, 22, 23], [6, 7, 20, 21], [8, 25, 26, 27], [9, 10, 11, 24], [12, 13, 15, 30], [14, 28, 29, 31], [16, 17, 18, 19]],
   [[0, 4, 8, 28], [1, 6, 18, 23], [2, 7, 17, 22], [3, 5, 26, 31], [9, 13, 14, 27], [10, 15, 19, 21], [11, 25, 29, 30], [12, 16, 20, 24]],
@@ -39,15 +28,10 @@ function log10Factorial(n) {
 }
 
 function partitionsPerWeek(players, groups, groupSize) {
-  // n! / ( (p!)^g * g! )  — grupet dhe rendi brenda grupit nuk kanë rëndësi
   const log10 = log10Factorial(players) - groups * log10Factorial(groupSize) - log10Factorial(groups);
   return log10;
 }
 
-/**
- * Sa herë një çift lojtarësh rishfaqet pas herës së parë.
- * Zgjidhja e plotë dhe e vlefshme ka objective = 0.
- */
 function objective(schedule) {
   const seen = new Map();
   let extraMeetings = 0;
@@ -90,12 +74,6 @@ function verifySchedule(schedule, groups, groupSize) {
   return true;
 }
 
-/**
- * DFS me backtracking.
- * Gjendja: orari i pjesshëm (disa javë, dhe grupi që po mbushet tani).
- * Në çdo hap zgjedhim p-1 shokë për lojtarin më të vogël që ende s'ka grup këtë javë.
- * Nëse grupi nuk plotëson kufizimin, kthehemi prapa (backtrack).
- */
 function solveWithDfs(groups, groupSize, weeks, options = {}) {
   const players = groups * groupSize;
   const trace = Boolean(options.trace);
@@ -150,7 +128,6 @@ function solveWithDfs(groups, groupSize, weeks, options = {}) {
   }
 
   function fillWeek(week, used, groupsLeft) {
-    // Java u mbush. Provo javën tjetër; nëse ajo dështon, kthehu dhe ndrysho grupet.
     if (groupsLeft === 0) return searchWeeks(week + 1);
 
     let anchor = 0;
@@ -190,8 +167,6 @@ function solveWithDfs(groups, groupSize, weeks, options = {}) {
         if (ok) candidates.push(player);
       }
 
-      // Rend i painformuar: numri më i vogël i pari.
-      // Nëse është dhënë një orar kandidat, ai lojtar provohet i pari, pastaj të tjerët.
       if (guide && guide[week]) {
         const hinted = guide[week].find((group) => group.includes(anchor));
         const nextHint = hinted
